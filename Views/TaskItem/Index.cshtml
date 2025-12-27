@@ -1,0 +1,70 @@
+﻿@model IEnumerable<TaskItem>
+@{
+    ViewData["Title"] = "Index";
+    var message = TempData["message"] ?? "";
+    var sortValue = TempData["SortValue"] ?? "";
+    bool? filterValue = TempData["FilterValue"] as bool?;
+
+}
+<div class="container">
+    <a asp-action="Create" class="btn btn-success">Create</a>
+    <p class="text-danger">@message</p>
+    <h1>Task List</h1>
+    <form asp-action="FilterAndSort" method="post">
+        <div class="row">
+            <div class="col-2">
+                <div class="form-group">
+                    <label>Sort on Due Date</label>
+                    <select name="SortValue" class="w-100">
+                        <option value="" selected="@(sortValue.ToString() == "")">Select Order</option>
+                        <option value="ASC" selected="@(sortValue.ToString() == "ASC")">Ascending</option>
+                        <option value="DESC" selected="@(sortValue.ToString() == "DESC")">Descending</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="form-group">
+                    <label>Task Completion</label>                    
+                    <select name="FilterValue" class="w-100">
+                        <option value="" selected="@(filterValue == null)">Select filter</option>
+                        <option value="false" selected="@(filterValue == false)">Not Complete</option>
+                        <option value="true" selected="@(filterValue == true)">Complete</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-1">
+                <button type="submit" class="btn btn-secondary mt-3">Search</button>
+            </div>
+        </div>       
+    </form>
+    <table class="table text-center">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Due Date</th>
+                <th>Current Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(Model is not null)
+            {
+                @foreach (var task in Model)
+                {
+                    <tr>
+                        <td>@task.Title</td>
+                        <td>@task.Description</td>
+                        <td>@(task?.DueDate.ToString() ?? "No due date")</td>
+                        <td>@(task.IsCompleted ? "Complete" : "Not Complete")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@task.Id" class="btn btn-primary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@task.Id" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }           
+        </tbody>
+    </table>
+</div>
+
