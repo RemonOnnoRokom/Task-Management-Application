@@ -10,16 +10,10 @@ using SimpleTaskManagementWebApplication.ViewModels;
 namespace SimpleTaskManagementWebApplication.Controllers
 {
     [Authorize]
-    public class TaskItemController : Controller
+    public class TaskItemController(ApplicationDbContext context, UserManager<AppUser> userManager) : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<AppUser> _userManager;
-
-        public TaskItemController(ApplicationDbContext context, UserManager<AppUser> userManager)
-        {
-            _context = context;
-            _userManager = userManager;
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly UserManager<AppUser> _userManager = userManager;
 
         public IActionResult Index()
         {
