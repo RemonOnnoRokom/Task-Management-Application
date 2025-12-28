@@ -148,44 +148,51 @@ namespace SimpleTaskManagementWebApplication.Controllers
             try
             {
                 int userId = Convert.ToInt32(_userManager.GetUserId(User));
-                var tasks = new List<TaskItem>();
+                
                 if (search.SortValue == null && search.FilterValue == null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
-                else if (search.SortValue != null && search.FilterValue == null)
+
+                IQueryable<TaskItem> query = _context.TaskItems.Where(t => t.AppUserId == userId);
+
+                if (search.SortValue != null && search.FilterValue == null)
                 {
                     if (search.SortValue == "ASC")
                     {
-                        tasks = _context.TaskItems.Where(t => t.AppUserId == userId).OrderBy(u => u.DueDate).ToList();
+                        query = query.OrderBy(u => u.DueDate);
                     }
                     else
                     {
-                        tasks = _context.TaskItems.Where(t => t.AppUserId == userId).OrderByDescending(u => u.DueDate).ToList();
+                        query = query.OrderByDescending(u => u.DueDate);
                     }
                 }
                 else if (search.SortValue == null && search.FilterValue != null)
                 {
-                    tasks = _context.TaskItems.Where(t => t.AppUserId == userId && t.IsCompleted == search.FilterValue).ToList();
+                    query = query.Where(t => t.IsCompleted == search.FilterValue);
                 }
                 else if (search.SortValue != null && search.FilterValue != null)
                 {
                     if (search.SortValue == "ASC")
                     {
-                        tasks = _context.TaskItems.Where(t => t.AppUserId == userId && t.IsCompleted == search.FilterValue).OrderBy(u => u.DueDate).ToList();
+                        query = query.Where(t => t.IsCompleted == search.FilterValue).OrderBy(u => u.DueDate);
                     }
                     else
                     {
-                        tasks = _context.TaskItems.Where(t => t.AppUserId == userId && t.IsCompleted == search.FilterValue).OrderByDescending(u => u.DueDate).ToList();
+                        query = query.Where(t => t.IsCompleted == search.FilterValue).OrderByDescending(u => u.DueDate);
                     }
                 }
+
+                var tasks = query.ToList();
                 TempData["SortValue"] = search.SortValue;
                 TempData["FilterValue"] = search.FilterValue;
-                return View(nameof(Index), tasks);
+
+                return View(nameof(Index), query.ToList());
             }
             catch (Exception)
             {
                 TempData["message"] = "Something went wrong while processing";
+
                 return RedirectToAction(nameof(Index));
             }
             
