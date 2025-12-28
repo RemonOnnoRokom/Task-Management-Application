@@ -1,24 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SimpleTaskManagementWebApplication.Data;
 using SimpleTaskManagementWebApplication.Models;
 using SimpleTaskManagementWebApplication.ViewModels;
 
 namespace SimpleTaskManagementWebApplication.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : Controller
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly ApplicationDbContext _context;
-
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ApplicationDbContext context)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _context = context;
-        }
+        private readonly UserManager<AppUser> _userManager = userManager;
+        private readonly SignInManager<AppUser> _signInManager = signInManager;
 
         public IActionResult Register()
         {
@@ -26,22 +17,24 @@ namespace SimpleTaskManagementWebApplication.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([Bind("FirstName, LastName, UserName, Email, Password, ConfirmPassword")] RegistrationViewModel rvm)
+        public async Task<IActionResult> Register([Bind("FirstName, LastName, UserName, Email, Password, ConfirmPassword")] RegistrationViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                AppUser appUser = new AppUser
+                var appUser = new AppUser
                 {
-                    FirstName = rvm.FirstName,
-                    LastName = rvm.LastName,
-                    Email = rvm.Email,
-                    UserName = rvm.Email
+                    FirstName = viewModel.FirstName,
+                    LastName = viewModel.LastName,
+                    Email = viewModel.Email,
+                    UserName = viewModel.Email
                 };
-                IdentityResult result = await _userManager.CreateAsync(appUser, rvm.Password);
+
+                var result = await _userManager.CreateAsync(appUser, viewModel.Password);
 
                 if (result.Succeeded)
-                {                
+                {
                     await _signInManager.SignInAsync(appUser, false);
+
                     return RedirectToAction(nameof(Index), nameof(TaskItem));
                 }
                 else
@@ -49,13 +42,17 @@ namespace SimpleTaskManagementWebApplication.Controllers
                     ViewData["errors"] = result.Errors;
                 }
             }
-            return View(rvm);
+
+            return View(viewModel);
         }
 
         public IActionResult Login(string returnUrl = "/")
         {
-            LoginViewModel login = new LoginViewModel();
-            login.ReturnUrl = returnUrl;
+            var login = new LoginViewModel
+            {
+                ReturnUrl = returnUrl
+            };
+
             return View(login);
         }
 
@@ -74,6 +71,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
                     ModelState.AddModelError("ReturnUrl", "Invalid login attempt.");
                 }
             }
+
             return View(model);
         }
 
@@ -81,6 +79,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+
             return RedirectToAction(nameof(Login));
         }
     }

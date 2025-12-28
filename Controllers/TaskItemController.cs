@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +27,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
                 TempData["message"] = "something went wrong when accessing the tasks";
                 return View();
             }
-            
+
         }
 
         public IActionResult Create()
@@ -52,7 +51,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
 
                 return View(task);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 ViewData["message"] = "Something went wrong";
                 return View(task);
@@ -71,16 +70,16 @@ namespace SimpleTaskManagementWebApplication.Controllers
                 }
                 return View(task);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 TempData["message"] = "Something went wrong";
                 return RedirectToAction(nameof(Index));
             }
-            
+
         }
 
         [HttpPost]
-        public  async Task<IActionResult> Edit([Bind("Id, Title, Description, DueDate, IsCompleted")] TaskItem task)
+        public async Task<IActionResult> Edit([Bind("Id, Title, Description, DueDate, IsCompleted")] TaskItem task)
         {
             try
             {
@@ -111,7 +110,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
                 ViewData["message"] = "Something went wrong";
                 return View(task);
             }
-            
+
         }
 
         public async Task<IActionResult> Delete(int id)
@@ -119,8 +118,8 @@ namespace SimpleTaskManagementWebApplication.Controllers
             try
             {
                 int userId = Convert.ToInt32((_userManager.GetUserId(User)));
-                var task = await _context.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.AppUserId == userId);           
-                if(task is null)
+                var task = await _context.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.AppUserId == userId);
+                if (task is null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -129,7 +128,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            catch(Exception)
+            catch (Exception)
             {
                 TempData["message"] = "Something went wrong";
                 return RedirectToAction(nameof(Index));
@@ -142,7 +141,7 @@ namespace SimpleTaskManagementWebApplication.Controllers
             try
             {
                 int userId = Convert.ToInt32(_userManager.GetUserId(User));
-                
+
                 if (search.SortValue == null && search.FilterValue == null)
                 {
                     return RedirectToAction(nameof(Index));
@@ -189,7 +188,6 @@ namespace SimpleTaskManagementWebApplication.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            
         }
     }
 }
